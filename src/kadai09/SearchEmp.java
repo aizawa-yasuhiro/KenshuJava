@@ -1,10 +1,11 @@
 package kadai09;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import util.DBUtil;
 
 /**
  *	課題【９－２】<br>
@@ -42,22 +43,22 @@ public class SearchEmp{
 		sql = sql + "  ORDER BY EMPNO";
 
 		// DB接続情報定義
-		String url = "jdbc:mariadb://localhost/kenshudb";	//接続パス
-		String id  = "root";	  //ログインID（SQL研修で使用したユーザ）
-		String pw  = "aizawa";	//パスワード（SQL研修で使用したパスワード）
-
-		try{
-		// JDBCドライバをロードする
-			Class.forName("org.mariadb.jdbc.Driver");	// DBごとの決まり文句
-		} catch(ClassNotFoundException ex) {	
-			System.out.println("JDBCドライバを読み込めませんでした。");
-			ex.printStackTrace();
-			return;
-		}
+//		String url = "jdbc:mariadb://localhost/kenshudb";	//接続パス
+//		String id  = "root";	  //ログインID（SQL研修で使用したユーザ）
+//		String pw  = "aizawa";	//パスワード（SQL研修で使用したパスワード）
+//
+//		try{
+//		// JDBCドライバをロードする
+//			Class.forName("org.mariadb.jdbc.Driver");	// DBごとの決まり文句
+//		} catch(ClassNotFoundException ex) {	
+//			System.out.println("JDBCドライバを読み込めませんでした。");
+//			ex.printStackTrace();
+//			return;
+//		}
 
 		try{
 			// DBとのコネクションを接続する
-			con = DriverManager.getConnection(url, id, pw);
+			con = DBUtil.getConnection();
 	   
 			// 実行するSQL文を指定し、実行する
 			stmt = con.createStatement();
@@ -77,17 +78,19 @@ public class SearchEmp{
 
 		} finally {
 			
-			try {
-				// DB接続を閉じる
-				if(rst != null) rst.close();
-				if(stmt!= null) stmt.close();
-				if(con != null) con.close();
-				
-			} catch(SQLException ex) {
-				System.out.println("DBの close時にエラーが発生しました。");
-				ex.printStackTrace();
-				return;
-			}
+//			try {
+//				// DB接続を閉じる
+//				if(rst != null) rst.close();
+//				if(stmt!= null) stmt.close();
+//				if(con != null) con.close();
+//				
+//			} catch(SQLException ex) {
+//				System.out.println("DBの close時にエラーが発生しました。");
+//				ex.printStackTrace();
+//				return;
+//			}
+			
+			DBUtil.close(rst, stmt, con);
 		}
 
 	}
