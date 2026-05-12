@@ -19,8 +19,7 @@ public class Sample19_03_ArrayList{
 		objList.set(2, new Sample13_Car("ホンダ", "オデッセイ"));
 		objList.remove(1);
 
-		for(int i=0; i < objList.size(); i ++){
-			Sample13_Car objCar = objList.get(i);
+		for(Sample13_Car objCar: objList){
 			objCar.print();
 		}
 	}
