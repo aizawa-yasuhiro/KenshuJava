@@ -18,7 +18,7 @@ public class InsUpdDept2 {
 
 	/**
 	 *	起動メソッド<br>
-	 *	Oracleに接続し、DEPT表の INSERT/UPDATEを行い、結果を出力する<br>
+	 *	MariaDBに接続し、DEPT表の INSERT/UPDATEを行い、結果を出力する<br>
 	 *	手動コミット/ロールバックを実施する
 	 *
 	 *	@param args	引数リスト（DEPTNO, DNAME, LOC）
@@ -32,28 +32,13 @@ public class InsUpdDept2 {
 		}
 
 		// DB接続変数定義
-		Connection con = null;				// DB接続
+		// Connection con = null;				// DB接続
 		PreparedStatement pstmt = null;		// SQL結果保持用オブジェクト
 		ResultSet rst = null;				// レコード
 		
-		// DB接続情報定義
-//		String url = "jdbc:mariadb://localhost/kenshudb";	//接続パス
-//		String id  = "root";	  //ログインID（SQL研修で使用したユーザ）
-//		String pw  = "aizawa";	//パスワード（SQL研修で使用したパスワード）
-//
-//		try{
-//		// JDBCドライバをロードする
-//			Class.forName("org.mariadb.jdbc.Driver");	// DBごとの決まり文句
-//		} catch(ClassNotFoundException ex) {	
-//			System.out.println("JDBCドライバを読み込めませんでした。");
-//			ex.printStackTrace();
-//			return;
-//		}
-
-
-		try{
-			// DBとのコネクションを接続する
-			con = DBUtil.getConnection();
+// DBUtilクラスを使用して、DB接続処理を簡略化する
+// try-with-resources構文を使用して、DBクローズ処理を簡略化する
+		try(Connection con = DBUtil.getConnection()){
 			
 			// 自動コミットモードを無効にする
 			if(con.getAutoCommit()) {
@@ -80,13 +65,25 @@ public class InsUpdDept2 {
 				sql = sql + " VALUES(?, ?, ?)";
 
 				// ・INSERT用の SQL文を実行する
-				pstmt = con.prepareStatement(sql);
-				pstmt.setString(1, args[0]);
-				pstmt.setString(2, args[1]);
-				pstmt.setString(3, args[2]);
-				pstmt.executeUpdate();
+				try (PreparedStatement pstmt2 = con.prepareStatement(sql)){
+					pstmt2.setString(1, args[0]);
+					pstmt2.setString(2, args[1]);
+					pstmt2.setString(3, args[2]);
+					pstmt2.executeUpdate();
+					con.commit();
+					System.out.println("データを1件追加しました。");
+				} catch (SQLException e) {
+					e.printStackTrace();
+					con.rollback();
+					System.out.println("DBをロールバックしました。");
+				}
+				// pstmt = con.prepareStatement(sql);
+				// pstmt.setString(1, args[0]);
+				// pstmt.setString(2, args[1]);
+				// pstmt.setString(3, args[2]);
+				// pstmt.executeUpdate();
 
-				System.out.println("データを1件追加しました。");
+				// System.out.println("データを1件追加しました。");
 
 			// 部門番号が存在する場合：更新
 			} else {
@@ -96,18 +93,30 @@ public class InsUpdDept2 {
 				sql = sql + " WHERE DEPTNO = ?";
 
 				// ・UPDATE用の SQL文を実行する
-				pstmt = con.prepareStatement(sql);
-				pstmt.setString(1, args[1]);
-				pstmt.setString(2, args[2]);
-				pstmt.setString(3, args[0]);
-				pstmt.executeUpdate();
+				try (PreparedStatement pstmt2 = con.prepareStatement(sql)){
+					pstmt2.setString(1, args[1]);
+					pstmt2.setString(2, args[2]);
+					pstmt2.setString(3, args[0]);
+					pstmt2.executeUpdate();
+					con.commit();
+					System.out.println("データを1件更新しました。");
+				} catch (SQLException e) {
+					e.printStackTrace();
+					con.rollback();
+					System.out.println("DBをロールバックしました。");
+				}
+				// pstmt = con.prepareStatement(sql);
+				// pstmt.setString(1, args[1]);
+				// pstmt.setString(2, args[2]);
+				// pstmt.setString(3, args[0]);
+				// pstmt.executeUpdate();
 
-				System.out.println("データを1件更新しました。");
+				// System.out.println("データを1件更新しました。");
 			}
 
 			// INSERT/UPDATEをコミットする
-			con.commit();
-			System.out.println("DBをコミットしました。");
+			// con.commit();
+			// System.out.println("DBをコミットしました。");
 
 
 			// INSERT/UPDATE後のDEPT表を取得する
@@ -129,31 +138,17 @@ public class InsUpdDept2 {
 			System.out.println("DBアクセス時にエラーが発生しました。");
 			ex.printStackTrace();
 
+			// try-with-resourceを使用するため、conはcatchブロック内では使用できない
+			// →個別にINSERT/UPDATEの実行処理内で try-catchを使用し、ロールバック処理を実施する
 			// INSERT/UPDATEをロールバックする
-			try {
-				con.rollback();
-				System.out.println("DBをロールバックしました。");
-			} catch(SQLException ex2) {
-				ex2.printStackTrace();
-			}
+			// try {
+			// 	con.rollback();
+			// 	System.out.println("DBをロールバックしました。");
+			// } catch(SQLException ex2) {
+			// 	ex2.printStackTrace();
+			// }
 
 			return;
-
-		} finally {
-			
-//			try {
-//				// DB接続を閉じる
-//				if(rst != null)   rst.close();
-//				if(pstmt != null) pstmt.close();
-//				if(con != null)   con.close();
-//				
-//			} catch(SQLException ex) {
-//				System.out.println("DBの close時にエラーが発生しました。");
-//				ex.printStackTrace();
-//				return;
-//			}
-			
-			DBUtil.close(rst, pstmt, con);
 		}
 		
 	}

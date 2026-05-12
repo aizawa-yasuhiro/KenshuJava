@@ -18,7 +18,7 @@ public class InsUpdDept {
 
 	/**
 	 *	起動メソッド<br>
-	 *	Oracleに接続し、DEPT表の INSERT/UPDATEを行い、結果を出力する
+	 *	MariaDBに接続し、DEPT表の INSERT/UPDATEを行い、結果を出力する
 	 *
 	 *	@param args	引数リスト（DEPTNO, DNAME, LOC）
 	*/
@@ -31,29 +31,13 @@ public class InsUpdDept {
 		}
 
 		// DB接続変数定義
-		Connection con = null;				// DB接続
+		// Connection con = null;				// DB接続
 		PreparedStatement pstmt = null;		// SQL結果保持用オブジェクト
 		ResultSet rst = null;				// レコード
 		
-		// DB接続情報定義
-//		String url = "jdbc:mariadb://localhost/kenshudb";	//接続パス
-//		String id  = "root";	  //ログインID（SQL研修で使用したユーザ）
-//		String pw  = "aizawa";	//パスワード（SQL研修で使用したパスワード）
-//
-//		try{
-//		// JDBCドライバをロードする
-//			Class.forName("org.mariadb.jdbc.Driver");	// DBごとの決まり文句
-//		} catch(ClassNotFoundException ex) {	
-//			System.out.println("JDBCドライバを読み込めませんでした。");
-//			ex.printStackTrace();
-//			return;
-//		}
-
-
-		try{
-			// DBとのコネクションを接続する
-			con = DBUtil.getConnection();
-
+// DBUtilクラスを使用して、DB接続処理を簡略化する
+// try-with-resources構文を使用して、DBクローズ処理を簡略化する
+		try(Connection con = DBUtil.getConnection()){
 
 			// 入力された部門番号の存在確認を行う
 			// ・件数取得用の SQL文を構築する
@@ -120,21 +104,6 @@ public class InsUpdDept {
 			ex.printStackTrace();
 			return;
 
-		} finally {
-			
-//			try {
-//				// DB接続を閉じる
-//				if(rst != null)   rst.close();
-//				if(pstmt != null) pstmt.close();
-//				if(con != null)   con.close();
-//				
-//			} catch(SQLException ex) {
-//				System.out.println("DBの close時にエラーが発生しました。");
-//				ex.printStackTrace();
-//				return;
-//			}
-			
-			DBUtil.close(rst, pstmt, con);
 		}
 
 	}
